@@ -1,0 +1,16 @@
+filebeat.inputs:
+  - type: log
+    paths:
+      # 로그 상대 경로 지정.
+      # - ../logs/
+      - /var/lib/hoonki/*.log
+    fields:
+      organization_name: Nuvilab
+      name: scanner_id
+
+output.logstash:
+  hosts: ["logstash:5000"]
+  
+http:
+  enabled: true
+  host: 0.0.0.0

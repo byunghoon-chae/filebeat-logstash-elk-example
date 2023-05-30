@@ -1,0 +1,51 @@
+version: '3'
+services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.12.1
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./logs:/var/lib/hoonki:ro # 로그 볼륨 설정
+    command: filebeat -e --strict.perms=false
+    networks:
+      - elk-stack
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.12.1
+    user: root
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      - "XPACK_MONITORING_ENABLED=false"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - filebeat
+    networks:
+      - elk-stack
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.12.1
+    environment:
+      - "discovery.type=single-node"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elk-stack
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.12.1
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - elk-stack
+
+networks:
+  elk-stack:
+    driver: bridge

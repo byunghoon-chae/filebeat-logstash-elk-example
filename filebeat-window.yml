@@ -1,0 +1,22 @@
+filebeat.inputs:
+  - type: log
+    paths:
+      # 로그 상대 경로 지정.
+      - ..\logs\*.log
+    fields:
+      organization_name: ${ORGANIZATION_NAME}
+      name: ${SCANNER_ID}
+
+output.logstash:
+  hosts: ["elk-scan.nuvi-lab.com:5044"]
+  ssl.certificate_authorities:
+    ['..\certificates\ca.pem']
+  ssl.certificate: '..\certificates\metricbeat.pem'
+  ssl.key: '..\certificates\metricbeat.key'
+
+## HTTP endpoint for health checking
+## https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html
+#
+http:
+  enabled: true
+  host: 0.0.0.0
